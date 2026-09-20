@@ -52,6 +52,20 @@ De dentro do cluster (datasource do Grafana, Prometheus-compatible):
 http://mimir.observability.svc:8080/prometheus
 ```
 
+## Verificar
+
+```bash
+curl -s -G 'http://<ip-do-node-k0s>:30900/prometheus/api/v1/query' \
+  --data-urlencode 'query=up{host="<ip-da-vm-onboardada>"}'
+```
+
+Resultado esperado: `"status":"success"` com um vetor não vazio. Se vier
+`"error":"too many unhealthy instances in the ring"`, é porque
+`replication_factor` do `ingester`/`store_gateway` está diferente de `1` -
+esse manifesto já sobe com `replication_factor: 1` porque só existe uma
+réplica; se algum dia aumentar `spec.replicas` no Deployment, ajuste esse
+valor junto.
+
 ## Remover o Mimir
 
 ```bash
