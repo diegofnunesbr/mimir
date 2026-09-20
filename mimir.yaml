@@ -22,6 +22,14 @@ data:
         filesystem:
           dir: /data/blocks
 
+    ingester:
+      ring:
+        replication_factor: 1
+
+    store_gateway:
+      sharding_ring:
+        replication_factor: 1
+
     blocks_storage:
       backend: filesystem
       filesystem:
