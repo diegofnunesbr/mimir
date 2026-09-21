@@ -33,6 +33,11 @@ cd mimir
 kubectl apply -f applications/argocd.mimir.yaml
 ```
 
+**Lembrete:** a Application aponta pro GitHub (`repoURL`), não pro seu
+clone local - qualquer mudança em `mimir.yaml` só tem efeito depois de
+`git push` (e um sync, automático ou forçado via
+`kubectl -n argocd patch application mimir --type merge -p '{"operation":{"sync":{}}}'`).
+
 ## Endpoint de ingestão
 
 O Service é `NodePort` (porta `30900`) porque quem envia métricas via
