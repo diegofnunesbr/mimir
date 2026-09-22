@@ -56,7 +56,7 @@ De dentro do cluster (datasource do Grafana, Prometheus-compatible - usa
 o Service direto, não o Ingress, é mais rápido e não sai do cluster):
 
 ```text
-http://mimir.observability.svc:8080/prometheus
+http://mimir.mimir.svc:8080/prometheus
 ```
 
 ## Verificar
@@ -78,7 +78,7 @@ valor junto.
 ```bash
 cd mimir
 kubectl delete -f applications/argocd.mimir.yaml
-kubectl delete namespace observability --ignore-not-found
+kubectl delete namespace mimir --ignore-not-found
 ```
 
 Isso também apaga as métricas armazenadas (a PVC fica presa ao namespace).

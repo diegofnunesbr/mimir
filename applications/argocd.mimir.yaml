@@ -13,7 +13,7 @@ spec:
       include: mimir.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: observability
+    namespace: mimir
   syncPolicy:
     automated:
       prune: true

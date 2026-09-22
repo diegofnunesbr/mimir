@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: observability
+  name: mimir
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mimir-config
-  namespace: observability
+  namespace: mimir
 data:
   mimir.yaml: |
     target: all
@@ -58,7 +58,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mimir-data
-  namespace: observability
+  namespace: mimir
 spec:
   accessModes:
     - ReadWriteOnce
@@ -70,7 +70,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mimir
-  namespace: observability
+  namespace: mimir
 spec:
   replicas: 1
   strategy:
@@ -112,7 +112,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mimir
-  namespace: observability
+  namespace: mimir
 spec:
   type: ClusterIP
   selector:
@@ -125,7 +125,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: mimir
-  namespace: observability
+  namespace: mimir
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-clusterissuer
 spec:
