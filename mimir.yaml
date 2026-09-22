@@ -114,10 +114,34 @@ metadata:
   name: mimir
   namespace: observability
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: mimir
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 30900
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mimir
+  namespace: observability
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-clusterissuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - mimir.diegofnunesbr.com
+      secretName: mimir-tls
+  rules:
+    - host: mimir.diegofnunesbr.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mimir
+                port:
+                  number: 8080
