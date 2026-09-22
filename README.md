@@ -6,14 +6,18 @@ receber métricas via `remote_write` das VMs do homelab. Sem MinIO/S3: usa
 pra escala de homelab, não recomendado em produção multi-tenant.
 
 Diferente da stack real da empresa (Mimir multi-tenant + Alloy com mTLS via
-gateway dedicado), aqui o Alloy manda direto pro Service do Mimir, sem TLS
-nem autenticação - a rede do homelab já é a fronteira de confiança.
+gateway dedicado), aqui o Alloy manda pro Mimir via HTTPS comum (TLS real
+via cert-manager, sem mTLS/autenticação de cliente) - a rede do homelab
+já é a fronteira de confiança.
 
 ## Pré-requisitos
 
 - `Kubernetes` instalado
 - `kubectl` instalado
 - ArgoCD instalado (ver repositório `argocd`)
+- `cert-manager` instalado (repositório `cert-manager`)
+- `ingress-nginx` instalado (via `core-config` do repositório `argocd`)
+- DNS `mimir.diegofnunesbr.com` apontando pro node (ver repositório `dns`)
 
 ## Estrutura do repositório
 
@@ -40,18 +44,16 @@ clone local - qualquer mudança em `mimir.yaml` só tem efeito depois de
 
 ## Endpoint de ingestão
 
-O Service é `NodePort` (porta `30900`) porque quem envia métricas via
-`remote_write` são as VMs do homelab via Alloy, que estão fora do
-cluster - de dentro do cluster, o Service também responde em
-`mimir.observability.svc:8080`.
-
-De fora do cluster (Alloy nas VMs onboardadas pelo Rundeck):
+O Service é `ClusterIP`, exposto via `Ingress` com TLS automático
+(cert-manager). De fora do cluster (Alloy nas VMs onboardadas pelo
+Rundeck, via `ansible/install-alloy.yml` do repositório `rundeck`):
 
 ```text
-http://<ip-do-node-k0s>:30900/api/v1/push
+https://mimir.diegofnunesbr.com/api/v1/push
 ```
 
-De dentro do cluster (datasource do Grafana, Prometheus-compatible):
+De dentro do cluster (datasource do Grafana, Prometheus-compatible - usa
+o Service direto, não o Ingress, é mais rápido e não sai do cluster):
 
 ```text
 http://mimir.observability.svc:8080/prometheus
@@ -60,7 +62,7 @@ http://mimir.observability.svc:8080/prometheus
 ## Verificar
 
 ```bash
-curl -s -G 'http://<ip-do-node-k0s>:30900/prometheus/api/v1/query' \
+curl -s -G 'https://mimir.diegofnunesbr.com/prometheus/api/v1/query' \
   --data-urlencode 'query=up{host="<ip-da-vm-onboardada>"}'
 ```
 
