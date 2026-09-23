@@ -128,9 +128,6 @@ metadata:
   namespace: mimir
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-clusterissuer
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: mimir-auth
-    nginx.ingress.kubernetes.io/auth-realm: mimir
 spec:
   ingressClassName: nginx
   tls:
