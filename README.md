@@ -16,7 +16,7 @@ já é a fronteira de confiança.
 - `kubectl` instalado
 - ArgoCD instalado (ver repositório `argocd`)
 - `cert-manager` instalado (repositório `cert-manager`)
-- `ingress-nginx` instalado (via `core-config` do repositório `argocd`)
+- `ingress-nginx` instalado (repositório `ingress-nginx`)
 - DNS `mimir.diegofnunesbr.com` apontando pro node (ver repositório `dns`)
 
 ## Estrutura do repositório
