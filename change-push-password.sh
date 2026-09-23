@@ -12,15 +12,18 @@ HASH=$(printf '%s' "$PW" | htpasswd -niB alloy)
 
 git pull --ff-only
 
-cat <<EOF | $SEAL > mimir-push-auth.sealed.yaml
+OTHERS=$($K -n mimir get secret mimir-auth -o jsonpath='{.data.auth}' 2>/dev/null | base64 -d | grep -v '^alloy:' || true)
+AUTH=$(printf '%s\n%s\n' "$HASH" "$OTHERS" | sed '/^$/d')
+
+cat <<EOF | $SEAL > mimir-auth.sealed.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mimir-push-auth
+  name: mimir-auth
   namespace: mimir
 type: Opaque
 data:
-  auth: $(printf '%s' "$HASH" | base64 -w0)
+  auth: $(printf '%s\n' "$AUTH" | base64 -w0)
 EOF
 
 cat <<EOF | $SEAL > alloy-push-password.sealed.yaml
@@ -34,7 +37,7 @@ data:
   password: $(printf '%s' "$PW" | base64 -w0)
 EOF
 
-git add mimir-push-auth.sealed.yaml alloy-push-password.sealed.yaml
+git add mimir-auth.sealed.yaml alloy-push-password.sealed.yaml
 git commit -m "rotate mimir push password"
 git push
 
@@ -57,6 +60,7 @@ if [ $# -eq 0 ]; then
 fi
 
 echo "Aguardando a senha nova chegar no pod do Rundeck..."
+CUR=""
 for _ in $(seq 1 60); do
   CUR=$($K -n rundeck exec deploy/rundeck -- cat /etc/alloy-push-password/password 2>/dev/null || true)
   [ "$CUR" = "$PW" ] && break
