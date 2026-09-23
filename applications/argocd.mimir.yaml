@@ -10,7 +10,7 @@ spec:
     targetRevision: main
     path: .
     directory:
-      include: "{mimir.yaml,*.sealed.yaml}"
+      include: mimir.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: mimir
