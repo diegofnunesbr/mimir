@@ -5,10 +5,13 @@ receber métricas via `remote_write` das VMs do homelab. Sem MinIO/S3: usa
 `filesystem` como backend de storage, direto na PVC do pod - suficiente
 pra escala de homelab, não recomendado em produção multi-tenant.
 
-Diferente da stack real da empresa (Mimir multi-tenant + Alloy com mTLS via
-gateway dedicado), aqui o Alloy manda pro Mimir via HTTPS comum (TLS real
-via cert-manager, sem mTLS/autenticação de cliente) - a rede do homelab
-já é a fronteira de confiança.
+Mesmo padrão da empresa no caminho de envio: o Alloy das VMs manda pro
+Mimir com **mTLS** (certificado de cliente), e o Ingress expõe **só** o
+envio. Lá é um gateway dedicado (`telemetry-agents`) na frente de um Mimir
+multi-tenant; aqui é o próprio Ingress do ingress-nginx fazendo a
+verificação, na frente de um Mimir sem multi-tenant. O Mimir não tem
+autenticação própria, então sem isso qualquer um na rede conseguia ler a
+config, consultar e gravar métricas.
 
 ## Pré-requisitos
 
@@ -42,27 +45,30 @@ clone local - qualquer mudança em `mimir.yaml` só tem efeito depois de
 `git push` (e um sync, automático ou forçado via
 `kubectl -n argocd patch application mimir --type merge -p '{"operation":{"sync":{}}}'`).
 
-## Endpoint de ingestão
+## Acesso
 
-O Service é `ClusterIP`, exposto via `Ingress` com TLS automático
-(cert-manager). De fora do cluster (Alloy nas VMs onboardadas pelo
-Rundeck, via `ansible/install-alloy.yml` do repositório `rundeck`):
+| Quem | Por onde | Autenticação |
+|---|---|---|
+| Alloy nas VMs (envio) | `https://mimir.diegofnunesbr.com/api/v1/push` | certificado de cliente emitido pela CA `mimir-agents-ca` |
+| Grafana (consultas) | `http://mimir.mimir.svc:8080/prometheus`, direto pelo Service | nenhuma, só dentro do cluster |
+| Você (debug, páginas de admin) | `kubectl --context=k0s -n mimir port-forward svc/mimir 8080:8080` e `http://localhost:8080` | acesso ao cluster |
 
-```text
-https://mimir.diegofnunesbr.com/api/v1/push
-```
+O Ingress só roteia `/api/v1/push` (`pathType: Exact`) e exige o
+certificado no host inteiro (`auth-tls-verify-client: "on"`, confiando na
+CA do Secret `cert-manager/mimir-agents-ca`). Sem certificado, qualquer
+requisição volta `400 No required SSL certificate was sent`; com
+certificado, qualquer caminho fora do envio volta 404. Abrir o endereço no
+navegador não funciona de propósito: quem usa ele é o Alloy.
 
-De dentro do cluster (datasource do Grafana, Prometheus-compatible - usa
-o Service direto, não o Ingress, é mais rápido e não sai do cluster):
-
-```text
-http://mimir.mimir.svc:8080/prometheus
-```
+A CA fica no repositório `cert-manager`; o certificado de cliente e a
+entrega pras VMs (e a renovação anual) no repositório `rundeck`, seção
+"Certificado mTLS do Alloy".
 
 ## Verificar
 
 ```bash
-curl -s -G 'https://mimir.diegofnunesbr.com/prometheus/api/v1/query' \
+kubectl --context=k0s -n mimir port-forward svc/mimir 8080:8080 &
+curl -s -G 'http://localhost:8080/prometheus/api/v1/query' \
   --data-urlencode 'query=up{host="<ip-da-vm-onboardada>"}'
 ```
 
