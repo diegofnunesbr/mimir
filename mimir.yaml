@@ -128,6 +128,9 @@ metadata:
   namespace: mimir
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-clusterissuer
+    nginx.ingress.kubernetes.io/auth-tls-secret: cert-manager/mimir-agents-ca
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
 spec:
   ingressClassName: nginx
   tls:
@@ -138,8 +141,8 @@ spec:
     - host: mimir.diegofnunesbr.com
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: /api/v1/push
+            pathType: Exact
             backend:
               service:
                 name: mimir
