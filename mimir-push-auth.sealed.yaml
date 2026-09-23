@@ -1,0 +1,20 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  creationTimestamp: null
+  name: mimir-push-auth
+  namespace: mimir
+spec:
+  encryptedData:
+    auth: AgCQawg3I4/TtAqrwbH8e8siMDRMbbMtfNfKpGV1DhTbk2guh3OwUQZm/dqUidLlgJzgIIYXKlG4iPcS0bw5nmX0qIlmYEzveg2d1Nb3WWjTCwqlrZBWUGJcB+Oo8sRe8+r7wFDP64O5/hYcOlow1zU9cwQeFwmulmPFBXA1BdwDsv2/oeQj8d+WJ58MT2bCuF+gpfDayfhszir2T6WsC6UuPU3/eU/KJq8HZHY8QBprVy3Z13pj4ZKMTsl7RQhvyIcuRHgZl+Hn4oG2a0qh1AArRv+sObKdmy4yGqDqe5bha0WLfM6gcu7e6eSQolvFfOXDTWiIKaXtO7cRUQ+wbTn8jMqDgSv5y9Sjg90tDQ6Ua2MBDsHfj5Rn1jaYj9H7dcZgsJVn6iV3ZRFUDgFy1+WmyinGnYJCjs44AISRc1g/xC7xtczcCZEjlmXq4RJbmiFwoaaR4ApW7nv0R4eBt9WvQywpjcnvBp8WuFzuVPTZhUO6G28zh5NlTKrMtumVR0xLgUBzQG/1BdgjPozqgdjqBFcrXTlV7MNjSoMfhrVi4oFLA+N8qdSiOfjmidp/JL2f5LwuNuDPQ/Ad4PpgM3/hQDz+f22xFZAmRFO+hWfRkcR+QQaShAt6m7s1PrHzYn66j0NKCTpmvujr0A/vQQIvwbBwEjiqgzCuJBrgis/R1nvl1kMPYfgl2dR4Kp5TX+e5dA0E2rBDeOFFmqSKFqptXODBGF9+nvHGrJ2mV74vtjwb3NaHl9sMts7bktL+UegGMHFABoFgLOyMwEYqMfhwhV4=
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/cluster-wide: "true"
+      creationTimestamp: null
+      name: mimir-push-auth
+      namespace: mimir
+    type: Opaque
+
